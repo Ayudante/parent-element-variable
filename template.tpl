@@ -540,7 +540,7 @@ Therefore, it will be replaced with "split ('xxxx'). Join ('')".
 Therefore, I gave up once.
 
 ● Editing history
-[2019/10/11 (work in progress)] Ayudante, Inc.
+[2019/10/11 (Update)] Ayudante, Inc.
 - The following modifications were made with the aim of posting in the community template gallery.
 -- Change Japanese to English.
 -- Brush up code.
@@ -589,7 +589,7 @@ For Japanese	日本語
 　そのため、いったん諦めています。
 
 ●編集履歴
-【2019/10/11（作業中）】Ayudante, Inc.
+【2019/10/11（更新）】Ayudante, Inc.
 ・コミュニティテンプレートギャラリーへの掲載を目指して、以下の改修を行いました。
 　　・日本語を英語へ変更
 　　・コードのブラッシュアップ
