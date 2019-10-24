@@ -174,6 +174,10 @@ ___TEMPLATE_PARAMETERS___
               {
                 "displayValue": "equals",
                 "value": "equal"
+              },
+              {
+                "value": "not-equal",
+                "displayValue": "not equals"
               }
             ],
             "defaultValue": "contain",
@@ -420,13 +424,15 @@ const checkFilter = function(targetValue){
 					return targetValue.indexOf(rule.filterValue) < 0 ? true : false;
 				case 'equal':
 					return targetValue === rule.filterValue ? true : false;
+				case 'not-equal':
+					return targetValue !== rule.filterValue ? true : false;
 			}
 		}).filter(function(check){	// Refine to NG (false) only
 			return check === false;
 		}).length === 0 ? true : false;	// true if false is 0, false if at least one
 	}else{
 		// HTML tag filter
-		return search.filter.tagName.toUpperCase() === dataLayer(getPath() + search.searchBottom) ? true : false;
+		return search.filter.tagName.toUpperCase() === targetValue ? true : false;
 	}
 };
 
@@ -473,12 +479,13 @@ switch(data.getValueDefault || data.getValueTagName){
 // --------- Processing
 // ---- Check back from the current location to the parent element
 do{
-	if(dataLayer(getPath() + search.searchBottom) !== undefined){
+	var nowPos = dataLayer(getPath() + search.searchBottom);
+	if(nowPos !== undefined){
 		// If the specified attribute exists
 		if(!search.filter){
 			// When there is no filter condition
 			return getValue();
-		}else if(checkFilter(dataLayer(getPath() + search.searchBottom))){
+		}else if(checkFilter(nowPos)){
 			// When there are filtering conditions
 			return getValue();
 		}
@@ -506,98 +513,108 @@ Google翻訳ありがとう！
 
 
 ----------------------------------------------------------------
-For English
+# For English
 ----------------------------------------------------------------
 
-This is a custom template that retrieves the parent element that matches the conditions up to the upper hierarchy and retrieves the value of the attribute (or included text) when retrieving data using Auto-Event Variables.
-It is primarily intended to be used to get link information using a click (all elements) trigger, or to get attribute values of a parent block using a link click trigger.
+This is a custom template that retrieves the parent element that matches the conditions up to the upper hierarchy and retrieves the value of the attribute (or included text) when retrieving data using Auto-Event Variables.  
+It is primarily intended to be used to get link information using a click (all elements) trigger, or to get attribute values of a parent block using a link click trigger.  
 
-●Operation overview
-[flow]
+## Operation overview
+### flow
 1. Go back from the element of the automatic event variable to the parent element with the attribute specified in "Value to be acquired".
 2. If the corresponding parent element is found, get the attribute value or the text of the entire parent element.
-[Remarks]
--Not only the parent element but also the element of the current location will be searched.
+### Remarks
+  - Not only the parent element but also the element of the current location will be searched.
 
-● Memo
-[Operating specifications]
--When "Element Text" is selected for "Get value", the following processing is performed instead of plain text.
--- Convert line feeds to single-byte spaces.
--- Delete tab.
+## Memo
+### Operating specifications
+- When "Element Text" is selected for "Get value", the following processing is performed instead of plain text.
+  - Convert line feeds to single-byte spaces.
+  - Delete tab.
 
-[Technical note]
-- Apparently, as of October 2019, regular expressions ("/ ～～ /") cannot be used in codes.
-Therefore, it will be replaced with "split ('xxxx'). Join ('')".
+### Technical note
+- Apparently, as of October 2019, regular expressions ("/ ～～ /") cannot be used in codes.  
+  Therefore, it will be replaced with "split ('xxxx'). Join ('')".
 - When gtm.element is specified in the global variable (copyFromWindow), it is described as "dataLayer [dataLayer.length-1] ['gtm.element']".
-- When trying to get the attribute value with gtm.element. *. Attributes.XXXX.value. An error occurs if "-" is included.
-  JS can be replaced with ".attributes [" XXXX "] .Value", but this description cannot be used.
-  Thus, for attribute values ​​that begin with "data-", the conditional branch is executed so that the dataset is referenced instead of the attribute.
-  In that case, conversion to camel case was necessary, so it was difficult to convert without using regular expressions.
+- When trying to get the attribute value with gtm.element. *. Attributes.XXXX.value. An error occurs if "-" is included.  
+  JS can be replaced with ".attributes [" XXXX "] .Value", but this description cannot be used.  
+  Thus, for attribute values that begin with "data-", the conditional branch is executed so that the dataset is referenced instead of the attribute.  
+  In that case, conversion to camel case was necessary, so it was difficult to convert without using regular expressions.  
 
-[Improvements]
-- I wanted to be able to get the element, but even if I got the dataLayer with a global variable (copyFromWindow) or tried to get it as a data layer variable (copyFromDataLayer) Could not get as.
-  (It seems that the value of the end property can be referenced, but the property with child properties cannot be obtained)
-Therefore, I gave up once.
+### Improvements
+- I wanted to be able to get the element, but even if I got the dataLayer with a global variable (copyFromWindow) or tried to get it as a data layer variable (copyFromDataLayer) Could not get as.  
+  (It seems that the value of the end property can be referenced, but the property with child properties cannot be obtained)  
+  Therefore, I gave up once.
 
-● Editing history
-[2019/10/11 (Update)] Ayudante, Inc.
+## Editing history
+### [2019/10/24 (Update)] Ayudante, Inc.
+- To reduce the processing load, the number of dataLayer API calls has been reduced.
+- Added "not equal" to the conditional operator to search.
+- Memo format is adjusted to GitHub README format.
+
+### [2019/10/11 (Update)] Ayudante, Inc.
 - The following modifications were made with the aim of posting in the community template gallery.
--- Change Japanese to English.
--- Brush up code.
--- Add "Form Action" to search target.
--- Add "HTML Tag Name" to search target (specify tag name required).
--- When the search target is other than "HTML Tag Name", the value condition can be specified by "contain | not-contain | equal".
--- You can specify an attribute different from that specified for the search target in the acquisition target.
+  - Change Japanese to English.
+  - Brush up code.
+  - Add "Form Action" to search target.
+  - Add "HTML Tag Name" to search target (specify tag name required).
+  - When the search target is other than "HTML Tag Name", the value condition can be specified by "contain | not-contain | equal".
+  - You can specify an attribute different from that specified for the search target in the acquisition target.
 
-[2019/05/24 (New)] Ayudante, Inc.
+### [2019/05/24 (New)] Ayudante, Inc.
 https://ayudante.jp/column/2019-05-24/18-04/
 - It was new registration.
 
 
 ----------------------------------------------------------------
-For Japanese	日本語
+# For Japanese	日本語
 ----------------------------------------------------------------
 
-自動イベント変数でデータ取得時に、条件に合致する親要素を上位階層へ遡って探し出し、任意の属性の値（または内包するテキスト）を取得するためのカスタムテンプレートです。
+自動イベント変数でデータ取得時に、条件に合致する親要素を上位階層へ遡って探し出し、任意の属性の値（または内包するテキスト）を取得するためのカスタムテンプレートです。  
 主にクリック（すべての要素）トリガーでリンク情報を取得したり、またはリンククリックトリガーで親ブロックの属性値を取得したりするための利用を想定しています。
 
-●動作概要
-【流れ】
-1.自動イベント変数のelementから、「取得する値」で指定した属性を持つ親要素まで遡ります。
-2.該当する親要素を見つけた場合に、属性の値または親要素全体のテキストを取得します。
-【備考】
-・親要素だけでなく、現在地のelementも検索対象となります。
+## 動作概要
+### 流れ
++ 自動イベント変数のelementから、「取得する値」で指定した属性を持つ親要素まで遡ります。
++ 該当する親要素を見つけた場合に、属性の値または親要素全体のテキストを取得します。
+### 備考
+- 親要素だけでなく、現在地のelementも検索対象となります。
 
-●メモ
-【動作仕様】
-・「Get value」で「Element Text」を選択した場合、素のままのテキストではなく、以下の処理を行っています。
-　　・改行を半角スペースへ変換
-　　・タブを削除
+## メモ
+### 動作仕様
+- 「Get value」で「Element Text」を選択した場合、素のままのテキストではなく、以下の処理を行っています。
+  - 改行を半角スペースへ変換
+  - タブを削除
 
-【技術上のメモ】
-・どうやら2019年10月現在、コード内では正規表現（「/～～/」）は使用できないようです。
-　そのため、「split('～～').join('')」などで代替しています。
-・gtm.elementをグローバル変数（copyFromWindow）で指定する場合は「dataLayer[dataLayer.length-1]['gtm.element']」という記述になります。
-・gtm.element.*.attributes.XXXX.valueで属性値を取得しようとした場合、「-」を含むものはエラーになります。
-　JSであれば「.attributes["XXXX"].value」で代替できますが、この記述は使用できないようです。
-　そのため、「data-」で始まる属性値の場合は条件分岐させて、attributesではなくdatasetを参照するようにしました。
-　なおその際、キャメルケースへの変換が必要だったため正規表現を使わずに（使えないので）変換大変でした。
+### 技術上のメモ
+- どうやら2019年10月現在、コード内では正規表現（「/～～/」）は使用できないようです。  
+  そのため、「split('～～').join('')」などで代替しています。
+- gtm.elementをグローバル変数（copyFromWindow）で指定する場合は「dataLayer[dataLayer.length-1]['gtm.element']」という記述になります。
+- gtm.element.*.attributes.XXXX.valueで属性値を取得しようとした場合、「-」を含むものはエラーになります。  
+  JSであれば「.attributes["XXXX"].value」で代替できますが、この記述は使用できないようです。  
+  そのため、「data-」で始まる属性値の場合は条件分岐させて、attributesではなくdatasetを参照するようにしました。  
+  なおその際、キャメルケースへの変換が必要だったため正規表現を使わずに（使えないので）変換大変でした。
 
-【改善点】
-・要素（element）の取得も可能にしたかったのですが、グローバル変数（copyFromWindow）でdataLayerを取得しても、データレイヤー変数（copyFromDataLayer）として取得しようとしても、いずれの場合でもgtm.elementをObjectとして取得することができませんでした。
-　（どうやら末端プロパティの値は参照可能ですが、子プロパティを持つプロパティは取得できないようです）
-　そのため、いったん諦めています。
+### 改善点
+- 要素（element）の取得も可能にしたかったのですが、グローバル変数（copyFromWindow）でdataLayerを取得しても、データレイヤー変数（copyFromDataLayer）として取得しようとしても、いずれの場合でもgtm.elementをObjectとして取得することができませんでした。  
+  （どうやら末端プロパティの値は参照可能ですが、子プロパティを持つプロパティは取得できないようです）  
+  そのため、いったん諦めています。
 
-●編集履歴
-【2019/10/11（更新）】Ayudante, Inc.
-・コミュニティテンプレートギャラリーへの掲載を目指して、以下の改修を行いました。
-　　・日本語を英語へ変更
-　　・コードのブラッシュアップ
-　　・検索対象へ「Form Action」を追加
-　　・検索対象へ「HTML Tag Name」を追加（要タグ名指定）
-　　・検索対象へ「HTML Tag Name」以外の場合に「contain|not-contain|equal」で値の条件指定を可能に
-　　・取得対象で検索対象で指定したものとは別の属性を指定可能に
+## 編集履歴
+### 【2019/10/24（更新）】Ayudante, Inc.
+- 処理負荷軽減のため、dataLayer APIの呼び出し回数を削減しました。
+- 検索対象の条件指定演算子へ「not equal（等しくない）」を追加しました。
+- メモのフォーマットをGitHubのREADMEフォーマットへ合わせました。
 
-【2019/05/24（新規作成）】Ayudante, Inc.
+### 【2019/10/11（更新）】Ayudante, Inc.
+- コミュニティテンプレートギャラリーへの掲載を目指して、以下の改修を行いました。
+  - 日本語を英語へ変更
+  - コードのブラッシュアップ
+  - 検索対象へ「Form Action」を追加
+  - 検索対象へ「HTML Tag Name」を追加（要タグ名指定）
+  - 検索対象へ「HTML Tag Name」以外の場合に「contain|not-contain|equal」で値の条件指定を可能に
+  - 取得対象で検索対象で指定したものとは別の属性を指定可能に
+
+### 【2019/05/24（新規作成）】Ayudante, Inc.
 https://ayudante.jp/column/2019-05-24/18-04/
-・新規登録しました。
+- 新規登録しました。
