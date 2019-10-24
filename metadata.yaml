@@ -15,5 +15,11 @@
 homepage: "https://ayudante.jp/"
 versions:
   # Latest version
+  - sha: 89c8f40e6525b0a79fb1365f9cf7b4e81e410468
+    changeNotes: |2
+      To reduce the processing load, the number of dataLayer API calls has been reduced.
+      Added "not equal" to the conditional operator to search.
+
+  # Older versions
   - sha: 12f290a6a4433a43dd3f8548fae8a60bb2531f8a
     changeNotes: Initial release.
