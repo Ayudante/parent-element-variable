@@ -20,8 +20,7 @@ ___INFO___
   "version": 1,
   "containerContexts": [
     "WEB"
-  ],
-  "brand": {}
+  ]
 }
 
 
@@ -73,7 +72,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SELECT",
         "subParams": [
           {
-            "help": "Enter the attribute name to be searched.<br>\n<strong>Note</strong>: Attribute names containing \"-\" are not supported except for custom data attributes.",
+            "help": "Enter the attribute name to be searched.\u003cbr\u003e\n\u003cstrong\u003eNote\u003c/strong\u003e: Attribute names containing \"-\" are not supported except for custom data attributes.",
             "enablingConditions": [
               {
                 "paramName": "searchAttr",
@@ -104,7 +103,7 @@ ___TEMPLATE_PARAMETERS___
             "valueHint": "e.g. data-gtm-XXX"
           },
           {
-            "help": "Enter the HTML's tag name to be searched.",
+            "help": "Enter the HTML\u0027s tag name to be searched.",
             "enablingConditions": [
               {
                 "paramName": "searchAttr",
@@ -141,7 +140,7 @@ ___TEMPLATE_PARAMETERS___
         "defaultValue": false,
         "simpleValueType": true,
         "name": "searchFilter",
-        "checkboxText": "Filtering attribute's value",
+        "checkboxText": "Filtering attribute\u0027s value",
         "type": "CHECKBOX"
       },
       {
@@ -212,11 +211,11 @@ ___TEMPLATE_PARAMETERS___
         "alwaysInSummary": false,
         "selectItems": [
           {
-            "displayValue": "Searched attribute's value",
+            "displayValue": "Searched attribute\u0027s value",
             "value": "searchAttr"
           },
           {
-            "displayValue": "Other attribute's value",
+            "displayValue": "Other attribute\u0027s value",
             "value": "inputAttr"
           },
           {
@@ -238,7 +237,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SELECT",
         "subParams": [
           {
-            "help": "Enter the attribute name to be got.<br> <strong>Note</strong>: Attribute names containing \"-\" are not supported except for custom data attributes.",
+            "help": "Enter the attribute name to be got.\u003cbr\u003e \u003cstrong\u003eNote\u003c/strong\u003e: Attribute names containing \"-\" are not supported except for custom data attributes.",
             "valueValidators": [
               {
                 "type": "NON_EMPTY"
@@ -268,6 +267,42 @@ ___TEMPLATE_PARAMETERS___
             "name": "getAttrNameDefault",
             "type": "TEXT",
             "valueHint": "e.g. data-gtm-XXX"
+          },
+          {
+            "type": "GROUP",
+            "name": "hrefCase",
+            "displayName": "",
+            "groupStyle": "NO_ZIPPY",
+            "subParams": [
+              {
+                "type": "CHECKBOX",
+                "name": "urlCompletion",
+                "checkboxText": "URL completion",
+                "simpleValueType": true,
+                "defaultValue": false,
+                "help": "If a protocol or other information is missing when obtaining link URL (href) and form\u0027s action URL, it completes what is missing. This will return a value similar to the URL obtained by the \"Click URL\" variable , \"Form URL\" variable.",
+                "enablingConditions": [
+                  {
+                    "paramName": "getValueDefault",
+                    "paramValue": "searchAttr",
+                    "type": "EQUALS"
+                  }
+                ],
+                "alwaysInSummary": true
+              }
+            ],
+            "enablingConditions": [
+              {
+                "paramName": "searchAttr",
+                "paramValue": "href",
+                "type": "EQUALS"
+              },
+              {
+                "paramName": "searchAttr",
+                "paramValue": "action",
+                "type": "EQUALS"
+              }
+            ]
           }
         ]
       },
@@ -276,7 +311,7 @@ ___TEMPLATE_PARAMETERS___
         "alwaysInSummary": true,
         "selectItems": [
           {
-            "displayValue": "Any attribute's value",
+            "displayValue": "Any attribute\u0027s value",
             "value": "inputAttr"
           },
           {
@@ -298,7 +333,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SELECT",
         "subParams": [
           {
-            "help": "Enter the attribute name to be got.<br> <strong>Note</strong>: Attribute names containing \"-\" are not supported except for custom data attributes.",
+            "help": "Enter the attribute name to be got.\u003cbr\u003e \u003cstrong\u003eNote\u003c/strong\u003e: Attribute names containing \"-\" are not supported except for custom data attributes.",
             "valueValidators": [
               {
                 "type": "NON_EMPTY"
@@ -336,42 +371,11 @@ ___TEMPLATE_PARAMETERS___
 ]
 
 
-___WEB_PERMISSIONS___
-
-[
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_data_layer",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "keyPatterns",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 1,
-                "string": "gtm.element.*"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  }
-]
-
-
 ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
 // -------- API required
-const dataLayer = require('copyFromDataLayer');
+const dataLayer = require('copyFromDataLayer');	// use to searach parent element.
+const getUrl = require('getUrl');	// use to url completion.
 
 // -------- Start Setting
 // ---- Functions
@@ -408,7 +412,70 @@ const getValue = function(){
 			// Convert line breaks and tabs to single-byte spaces.
 			return dataLayer(getPath() + search.getBottom).trim().split('\n').join(' ').split('\t').join('');
 		default:
-			return dataLayer(getPath() + search.getBottom) || undefined;
+			let returnValue = dataLayer(getPath() + search.getBottom) || undefined;
+			if(data.urlCompletion){	// for get to "Link URL" and completion case
+				let nowPage = {
+					'protocol': getUrl('protocol'),
+					'domain': getUrl('host'),
+					'path': getUrl('path'),
+					'query': getUrl('query')
+				};
+				if(nowPage.query.length > 0){	// If there is a query parameter, prefix it with "?" at the beginning
+					nowPage.query = '?' + nowPage.query;
+				}
+				let returnURL = returnValue;	// for return at the end
+				
+				// -------- Allocation according to what you get --------
+				if(returnValue.indexOf('#') == 0){
+					// ---- If it was a link within a page
+					returnURL = nowPage.protocol + '://' + nowPage.domain + nowPage.path + nowPage.query + returnValue;
+				}else if(returnValue.indexOf('?') == 0){
+					// ---- If it was a query parameter grant (or change) link
+					returnURL = nowPage.protocol + '://' + nowPage.domain + nowPage.path + returnValue;
+				}else if(returnValue.indexOf(':') > 0 && returnValue.indexOf(':') < 20){
+					// ---- If ":" is within the first 20 characters, it is considered an absolute path link or other link.
+					returnURL = returnValue;
+				}else if(returnValue.indexOf('//') == 0){
+					// ---- If it is a protocol abbreviated absolute path link
+					returnURL = nowPage.protocol + ':' + returnValue;
+				}else if(returnValue.indexOf('/') == 0){
+					// ---- If it is a root path link
+					returnURL = nowPage.protocol + '://' + nowPage.domain + returnValue;
+				}else if(returnValue.indexOf('../') == 0){
+					// ---- If it is a relative path link
+					let href = returnValue.split('../');
+					let paths = nowPage.path.split('/');
+					if(paths[paths.length - 1] !== ''){
+						// If the terminal directory is not at the '/' end, convert it to the '/' end.
+						paths.pop();
+					}
+					for(let i = 0; i < href.length; i++){
+						// '../' number of directories removed from the terminus
+						paths.pop();
+					}
+					returnURL = nowPage.protocol + '://' + nowPage.domain + paths.join('/') + '/' + href[href.length - 1];
+				}else{
+					// ---- If it is a same-level relative path link
+					if(returnValue.indexOf('./') == 0) {	// './aaa' and 'aaa' are identical and should be aligned
+						returnValue = returnValue.substring(1);	// Drawing near to '/aaa'
+					}else{
+						returnValue = '/' + returnValue;	// Add '/' at the top
+					}
+					let paths = nowPage.path.split('/');
+					if(paths.length > 2){	// Delete the end of the current path and concatenate the contents of the Parent Element Variable backwards.
+						paths.pop();
+						paths = paths.join('/') + returnValue;
+					}else{
+						paths = paths.pop() + returnValue;
+					}
+					returnURL = nowPage.protocol + '://' + nowPage.domain + paths;
+				}
+				
+				// -------- return --------
+				return returnURL;
+			}else{	// for others
+				return returnValue;
+			}
 	}
 };
 
@@ -438,12 +505,13 @@ const checkFilter = function(targetValue){
 
 // ---- Default Settings
 // -- Search target
-var search = {	// Temp for dataLayer specification of search target
+let search = {	// Temp for dataLayer specification of search target
 	'top': 'gtm.element',
 	'parent': '',
 	'searchBottom': '',
 	'getBottom': ''
 };
+
 // -- Adjust search target by choice
 switch(data.searchAttr){	// Search target attribute name (href, action, id, class, custom, tagName)
 	case 'custom':
@@ -479,7 +547,7 @@ switch(data.getValueDefault || data.getValueTagName){
 // --------- Processing
 // ---- Check back from the current location to the parent element
 do{
-	var nowPos = dataLayer(getPath() + search.searchBottom);
+	let nowPos = dataLayer(getPath() + search.searchBottom);
 	if(nowPos !== undefined){
 		// If the specified attribute exists
 		if(!search.filter){
@@ -495,6 +563,78 @@ do{
 
 // ---- If the element is not found
 return undefined;
+
+
+___WEB_PERMISSIONS___
+
+[
+  {
+    "instance": {
+      "key": {
+        "publicId": "read_data_layer",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "allowedKeys",
+          "value": {
+            "type": 1,
+            "string": "specific"
+          }
+        },
+        {
+          "key": "keyPatterns",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 1,
+                "string": "gtm.element.*"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "get_url",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "urlParts",
+          "value": {
+            "type": 1,
+            "string": "any"
+          }
+        },
+        {
+          "key": "queriesAllowed",
+          "value": {
+            "type": 1,
+            "string": "any"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  }
+]
+
+
+___TESTS___
+
+scenarios: []
 
 
 ___NOTES___
@@ -618,3 +758,5 @@ https://ayudante.jp/column/2019-05-24/18-04/
 ### 【2019/05/24（新規作成）】Ayudante, Inc.
 https://ayudante.jp/column/2019-05-24/18-04/
 - 新規登録しました。
+
+
