@@ -16,11 +16,15 @@ homepage: "https://ayudante.jp/"
 documentation: "https://ayudante.jp/column/2019-10-30/11-00/"
 versions:
   # Latest version
+  - sha: 860df07b323fbb45b416c6db3789e64b1bd79371
+    changeNotes: |2
+      A new option "URL completion" has been added when selecting "Link URL" or "Form Action" in "Search target" and "Searched attribute's value" in "Get value".
+      When enabled, if the retrieved content is missing as a URL, the missing information such as protocol can be stored and the value can be obtained in the form of a URL.
+
+  # Older versions
   - sha: 89c8f40e6525b0a79fb1365f9cf7b4e81e410468
     changeNotes: |2
       To reduce the processing load, the number of dataLayer API calls has been reduced.
       Added "not equal" to the conditional operator to search.
-
-  # Older versions
   - sha: 12f290a6a4433a43dd3f8548fae8a60bb2531f8a
     changeNotes: Initial release.
