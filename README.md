@@ -30,6 +30,9 @@ It is primarily intended to be used to get link information using a click (all e
   Therefore, I gave up once.
 
 ## Editing history
+### [2024/05/17 (Update)] Ayudante, Inc.
+- Added "URL completion" to get for "Link URL" or "Form Action".
+
 ### [2019/10/24 (Update)] Ayudante, Inc.
 - To reduce the processing load, the number of dataLayer API calls has been reduced.
 - Added "not equal" to the conditional operator to search.
